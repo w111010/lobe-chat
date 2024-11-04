@@ -84,8 +84,7 @@ const Qwen: ModelProviderCard = {
       vision: true,
     },
     {
-      description:
-        '通义千问数学模型是专门用于数学解题的语言模型。',
+      description: '通义千问数学模型是专门用于数学解题的语言模型。',
       displayName: 'Qwen Math Turbo',
       id: 'qwen-math-turbo-latest',
       pricing: {
@@ -96,8 +95,7 @@ const Qwen: ModelProviderCard = {
       tokens: 4096,
     },
     {
-      description:
-        '通义千问数学模型是专门用于数学解题的语言模型。',
+      description: '通义千问数学模型是专门用于数学解题的语言模型。',
       displayName: 'Qwen Math Plus',
       id: 'qwen-math-plus-latest',
       pricing: {

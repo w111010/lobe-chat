@@ -67,8 +67,7 @@ const Mistral: ModelProviderCard = {
       vision: true,
     },
     {
-      description:
-        'Ministral 3B 是Mistral的世界顶级边缘模型。',
+      description: 'Ministral 3B 是Mistral的世界顶级边缘模型。',
       displayName: 'Ministral 3B',
       id: 'ministral-3b-latest',
       pricing: {
@@ -78,8 +77,7 @@ const Mistral: ModelProviderCard = {
       tokens: 128_000,
     },
     {
-      description:
-        'Ministral 8B 是Mistral的性价比极高的边缘模型。',
+      description: 'Ministral 8B 是Mistral的性价比极高的边缘模型。',
       displayName: 'Ministral 8B',
       id: 'ministral-8b-latest',
       pricing: {
