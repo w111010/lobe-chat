@@ -10,6 +10,7 @@ import { LobeAzureOpenAI } from './azureOpenai';
 import { LobeBaichuanAI } from './baichuan';
 import { LobeBedrockAI, LobeBedrockAIParams } from './bedrock';
 import { LobeDeepSeekAI } from './deepseek';
+import { LobeDoubaoAI } from './doubao';
 import { LobeFireworksAI } from './fireworksai';
 import { LobeGithubAI } from './github';
 import { LobeGoogleAI } from './google';
@@ -132,6 +133,7 @@ class AgentRuntime {
       baichuan: Partial<ClientOptions>;
       bedrock: Partial<LobeBedrockAIParams>;
       deepseek: Partial<ClientOptions>;
+      doubao: Partial<ClientOptions>;
       fireworksai: Partial<ClientOptions>;
       github: Partial<ClientOptions>;
       google: { apiKey?: string; baseURL?: string };
@@ -319,6 +321,11 @@ class AgentRuntime {
 
       case ModelProvider.SenseNova: {
         runtimeModel = await LobeSenseNovaAI.fromAPIKey(params.sensenova);
+        break;
+      }
+
+      case ModelProvider.Doubao: {
+        runtimeModel = new LobeDoubaoAI(params.doubao ?? {});
         break;
       }
     }

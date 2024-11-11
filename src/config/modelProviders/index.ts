@@ -7,6 +7,7 @@ import AzureProvider from './azure';
 import BaichuanProvider from './baichuan';
 import BedrockProvider from './bedrock';
 import DeepSeekProvider from './deepseek';
+import DoubaoProvider from './doubao';
 import FireworksAIProvider from './fireworksai';
 import GithubProvider from './github';
 import GoogleProvider from './google';
@@ -65,6 +66,7 @@ export const LOBE_DEFAULT_MODEL_LIST: ChatModelCard[] = [
   HunyuanProvider.chatModels,
   WenxinProvider.chatModels,
   SenseNovaProvider.chatModels,
+  DoubaoProvider.chatModels,
 ].flat();
 
 export const DEFAULT_MODEL_PROVIDER_LIST = [
@@ -88,6 +90,7 @@ export const DEFAULT_MODEL_PROVIDER_LIST = [
   UpstageProvider,
   QwenProvider,
   WenxinProvider,
+  DoubaoProvider,
   HunyuanProvider,
   SparkProvider,
   ZhiPuProvider,
@@ -118,6 +121,7 @@ export { default as AzureProviderCard } from './azure';
 export { default as BaichuanProviderCard } from './baichuan';
 export { default as BedrockProviderCard } from './bedrock';
 export { default as DeepSeekProviderCard } from './deepseek';
+export { default as DoubaoProviderCard } from './doubao';
 export { default as FireworksAIProviderCard } from './fireworksai';
 export { default as GithubProviderCard } from './github';
 export { default as GoogleProviderCard } from './google';

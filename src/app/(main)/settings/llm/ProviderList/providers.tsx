@@ -30,6 +30,7 @@ import {
 import { ProviderItem } from '../type';
 import { useAzureProvider } from './Azure';
 import { useBedrockProvider } from './Bedrock';
+import { useDoubaoProvider } from './Doubao';
 import { useGithubProvider } from './Github';
 import { useHuggingFaceProvider } from './HuggingFace';
 import { useOllamaProvider } from './Ollama';
@@ -46,6 +47,7 @@ export const useProviderList = (): ProviderItem[] => {
   const HuggingFaceProvider = useHuggingFaceProvider();
   const WenxinProvider = useWenxinProvider();
   const SenseNovaProvider = useSenseNovaProvider();
+  const DoubaoProvider = useDoubaoProvider();
 
   return useMemo(
     () => [
@@ -81,6 +83,7 @@ export const useProviderList = (): ProviderItem[] => {
       Ai360ProviderCard,
       TaichuProviderCard,
       SiliconCloudProviderCard,
+      DoubaoProvider,
     ],
     [
       AzureProvider,
@@ -91,6 +94,7 @@ export const useProviderList = (): ProviderItem[] => {
       WenxinProvider,
       HuggingFaceProvider,
       SenseNovaProvider,
+      DoubaoProvider,
     ],
   );
 };

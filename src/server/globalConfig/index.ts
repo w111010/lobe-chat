@@ -143,6 +143,9 @@ export const getServerGlobalConfig = () => {
 
     ENABLED_HUGGINGFACE,
     HUGGINGFACE_MODEL_LIST,
+
+    ENABLED_DOUBAO,
+    DOUBAO_MODEL_LIST,
   } = getLLMConfig();
 
   const config: GlobalServerConfig = {
@@ -208,6 +211,14 @@ export const getServerGlobalConfig = () => {
         serverModelCards: transformToChatModelCards({
           defaultChatModels: DeepSeekProviderCard.chatModels,
           modelString: DEEPSEEK_MODEL_LIST,
+        }),
+      },
+      doubao: { enabled: ENABLED_DOUBAO,
+        enabledModels: extractEnabledModels(DOUBAO_MODEL_LIST, true),
+        serverModelCards: transformToChatModelCards({
+          defaultChatModels: [],
+          modelString: DOUBAO_MODEL_LIST,
+          withDeploymentName: true,
         }),
       },
       fireworksai: {
