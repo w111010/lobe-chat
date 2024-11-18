@@ -45,8 +45,8 @@ const getLlmOptionsFromPayload = (provider: string, payload: JWTPayload) => {
       const endpoint = payload?.endpoint || AZURE_ENDPOINT;
       const apiVersion = payload?.azureApiVersion || AZURE_API_VERSION;
       return {
+        apiKey,
         apiVersion,
-        apikey: apiKey,
         endpoint,
       };
     }
