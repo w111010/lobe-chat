@@ -282,5 +282,16 @@
     "bps": true,
     "folderMillis": 1731858381716,
     "hash": "d8263bfefe296ed366379c7b7fc65195d12e6a1c0a9f1c96097ea28f2123fe50"
+  },
+  {
+    "sql": [
+      "CREATE TABLE \"ai_models\" (\n\t\"id\" varchar(150) NOT NULL,\n\t\"display_name\" varchar(200),\n\t\"description\" text,\n\t\"organization\" varchar(100),\n\t\"type\" varchar(20) DEFAULT 'chat' NOT NULL,\n\t\"user_id\" text NOT NULL,\n\t\"pricing\" jsonb,\n\t\"parameters\" jsonb DEFAULT '{}'::jsonb,\n\t\"config\" jsonb,\n\t\"abilities\" jsonb DEFAULT '{}'::jsonb,\n\t\"context_window_tokens\" integer,\n\t\"accessed_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"created_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"updated_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\tCONSTRAINT \"ai_models_id_user_id_pk\" PRIMARY KEY(\"id\",\"user_id\")\n);\n",
+      "\nCREATE TABLE \"ai_providers\" (\n\t\"id\" varchar(64) NOT NULL,\n\t\"name\" text,\n\t\"user_id\" text NOT NULL,\n\t\"sort\" integer,\n\t\"enabled\" boolean,\n\t\"check_model\" text,\n\t\"logo\" text,\n\t\"sdk_type\" text DEFAULT 'openai',\n\t\"description\" text,\n\t\"enabled_chat_models\" text[],\n\t\"key_vaults\" text,\n\t\"config\" jsonb,\n\t\"accessed_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"created_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"updated_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\tCONSTRAINT \"ai_providers_id_user_id_pk\" PRIMARY KEY(\"id\",\"user_id\")\n);\n",
+      "\nALTER TABLE \"ai_models\" ADD CONSTRAINT \"ai_models_user_id_users_id_fk\" FOREIGN KEY (\"user_id\") REFERENCES \"public\".\"users\"(\"id\") ON DELETE cascade ON UPDATE no action;",
+      "\nALTER TABLE \"ai_providers\" ADD CONSTRAINT \"ai_providers_user_id_users_id_fk\" FOREIGN KEY (\"user_id\") REFERENCES \"public\".\"users\"(\"id\") ON DELETE cascade ON UPDATE no action;"
+    ],
+    "bps": true,
+    "folderMillis": 1735206779232,
+    "hash": "77b89e8d8412933bb5e6968e0c38140edefd352e97fac8bdb2f03706b0cd1411"
   }
 ]

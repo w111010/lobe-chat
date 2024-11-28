@@ -78,6 +78,17 @@ export default {
       title: 'HuggingFace Token',
     },
   },
+  menu: {
+    addCustomProvider: '自定义服务商',
+    all: '全部',
+    notFound: '未找到搜索结果',
+    searchProviders: '搜索服务商...',
+    sort: {
+      alphabet: '按首字母排序',
+      customOrder: '自定义排序',
+      default: '默认排序',
+    },
+  },
   ollama: {
     checker: {
       desc: '测试代理地址是否正确填写',
@@ -157,6 +168,7 @@ export default {
   zeroone: {
     title: '01.AI 零一万物',
   },
+
   zhipu: {
     title: '智谱',
   },
