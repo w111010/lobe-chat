@@ -1,8 +1,10 @@
 import { ModelProvider } from '@/libs/agent-runtime';
-
-import { genUserLLMConfig } from '@/utils/genUserLLMConfig'
+import { genUserLLMConfig } from '@/utils/genUserLLMConfig';
 
 export const DEFAULT_LLM_CONFIG = genUserLLMConfig({
+  lmstudio: {
+    fetchOnClient: true,
+  },
   ollama: {
     enabled: true,
     fetchOnClient: true,
