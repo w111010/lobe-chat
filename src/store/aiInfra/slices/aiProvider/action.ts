@@ -7,6 +7,7 @@ import { AiInfraStore } from '@/store/aiInfra/store';
 import {
   AiProviderDetailItem,
   AiProviderListItem,
+  AiProviderSortMap,
   CreateAiProviderParams,
 } from '@/types/aiProvider';
 
@@ -21,6 +22,7 @@ export interface AiProviderAction {
   removeAiProvider: (id: string) => Promise<void>;
   toggleProviderEnabled: (id: string, enabled: boolean) => Promise<void>;
   updateAiProvider: (id: string, value: CreateAiProviderParams) => Promise<void>;
+  updateAiProviderSort: (items: AiProviderSortMap[]) => Promise<void>;
 
   useFetchAiProviderItem: (id: string) => SWRResponse<AiProviderDetailItem | undefined>;
   useFetchAiProviderList: (params?: { suspense?: boolean }) => SWRResponse<AiProviderListItem[]>;
@@ -71,6 +73,10 @@ export const createCrudSlice: StateCreator<
     get().internal_toggleAiProviderLoading(id, false);
   },
 
+  updateAiProviderSort: async (items) => {
+    await aiProviderService.updateAiProviderOrder(items);
+    await get().refreshAiProviderList();
+  },
   useFetchAiProviderItem: (id) =>
     useClientDataSWR<AiProviderDetailItem | undefined>([FETCH_AI_PROVIDER_ITEM_KEY, id], () =>
       aiProviderService.getAiProviderById(id),

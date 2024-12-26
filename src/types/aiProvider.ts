@@ -132,3 +132,10 @@ export interface AiProviderDetailItem {
   sdkType?: 'openai' | 'anthropic';
   source: 'builtin' | 'custom';
 }
+
+// Update
+
+export interface AiProviderSortMap {
+  id: string;
+  sort: number;
+}

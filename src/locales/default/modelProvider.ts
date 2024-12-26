@@ -131,11 +131,7 @@ export default {
     },
     notFound: '未找到搜索结果',
     searchProviders: '搜索服务商...',
-    sort: {
-      alphabet: '按首字母排序',
-      customOrder: '自定义排序',
-      default: '默认排序',
-    },
+    sort: '自定义排序',
   },
   ollama: {
     checker: {
@@ -193,6 +189,11 @@ export default {
       title: '下载指定的 Ollama 模型',
     },
   },
+  sortModal: {
+    success: '排序更新成功',
+    title: '自定义排序',
+    update: '更新',
+  },
   wenxin: {
     accessKey: {
       desc: '填入百度千帆平台的 Access Key',
@@ -213,11 +214,9 @@ export default {
       title: '使用自定义文心一言鉴权信息',
     },
   },
-
   zeroone: {
     title: '01.AI 零一万物',
   },
-
   zhipu: {
     title: '智谱',
   },

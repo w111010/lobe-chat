@@ -1,4 +1,4 @@
-import { and, desc, eq } from 'drizzle-orm/expressions';
+import { and, asc, desc, eq } from 'drizzle-orm/expressions';
 
 import { LobeChatDatabase } from '@/database/type';
 import { ModelProvider } from '@/libs/agent-runtime';
@@ -77,7 +77,7 @@ export class AiProviderModel {
       })
       .from(aiProviders)
       .where(eq(aiProviders.userId, this.userId))
-      .orderBy(desc(aiProviders.updatedAt));
+      .orderBy(asc(aiProviders.sort), desc(aiProviders.updatedAt));
 
     return result as AiProviderListItem[];
   };
@@ -116,10 +116,22 @@ export class AiProviderModel {
   updateOrder = async (sortMap: { id: string; sort: number }[]) => {
     await this.db.transaction(async (tx) => {
       const updates = sortMap.map(({ id, sort }) => {
+        const isBuiltin = Object.values(ModelProvider).includes(id as any);
+
         return tx
-          .update(aiProviders)
-          .set({ sort, updatedAt: new Date() })
-          .where(and(eq(aiProviders.id, id), eq(aiProviders.userId, this.userId)));
+          .insert(aiProviders)
+          .values({
+            enabled: true,
+            id,
+            sort,
+            source: isBuiltin ? 'builtin' : 'custom',
+            updatedAt: new Date(),
+            userId: this.userId,
+          })
+          .onConflictDoUpdate({
+            set: { sort, updatedAt: new Date() },
+            target: [aiProviders.id, aiProviders.userId],
+          });
       });
 
       await Promise.all(updates);
