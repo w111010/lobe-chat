@@ -64,6 +64,44 @@ export default {
       title: 'Cloudflare 账户 ID / API 地址',
     },
   },
+  createNewAiProvider: {
+    apiKey: {
+      placeholder: '请填写你的 API Key',
+      required: '请填写你的 API Key',
+      title: 'API Key',
+    },
+    basicTitle: '基本信息',
+    configTitle: '配置信息',
+    confirm: '新建',
+    createSuccess: '新建成功',
+    description: {
+      placeholder: '服务商简介（选填）',
+      title: '服务商简介',
+    },
+    id: {
+      placeholder: '建议全小写，例如 openai',
+      required: '请填写服务商 ID',
+      title: '服务商唯一 ID',
+    },
+    logo: {
+      required: '请上传正确的服务商 Logo',
+      title: '服务商 Logo',
+    },
+    name: {
+      placeholder: '请输入服务商的展示名称',
+      required: '请填写服务商名称',
+      title: '服务商名称',
+    },
+    proxyUrl: {
+      placeholder: '请填写你的请求地址，如果不填则会使用 SDK 对应的请求地址',
+      title: '代理地址',
+    },
+    sdkType: {
+      required: '请选择 SDK 类型',
+      title: '请求格式',
+    },
+    title: '创建自定义 AI 服务商',
+  },
   github: {
     personalAccessToken: {
       desc: '填入你的 Github PAT，点击 [这里](https://github.com/settings/tokens) 创建',
@@ -78,9 +116,19 @@ export default {
       title: 'HuggingFace Token',
     },
   },
+  list: {
+    title: {
+      disabled: '未启用服务商',
+      enabled: '已启用服务商',
+    },
+  },
   menu: {
-    addCustomProvider: '自定义服务商',
+    addCustomProvider: '添加自定义服务商',
     all: '全部',
+    list: {
+      disabled: '未启用',
+      enabled: '已启用',
+    },
     notFound: '未找到搜索结果',
     searchProviders: '搜索服务商...',
     sort: {
@@ -165,6 +213,7 @@ export default {
       title: '使用自定义文心一言鉴权信息',
     },
   },
+
   zeroone: {
     title: '01.AI 零一万物',
   },

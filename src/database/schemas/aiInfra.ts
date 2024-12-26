@@ -25,7 +25,8 @@ export const aiProviders = pgTable(
     enabledChatModels: text('enabled_chat_models').array(),
     // need to be encrypted
     keyVaults: text('key_vaults'),
-    config: jsonb('config'),
+    source: varchar('source', { enum: ['builtin', 'custom'], length: 20 }),
+    config: jsonb('config').$defaultFn(() => ({})),
 
     ...timestamps,
   },
@@ -33,7 +34,7 @@ export const aiProviders = pgTable(
 );
 
 export type NewAiProviderItem = Omit<typeof aiProviders.$inferInsert, 'userId'>;
-export type AiProviderItem = typeof aiProviders.$inferSelect;
+export type AiProviderSelectItem = typeof aiProviders.$inferSelect;
 
 export const aiModels = pgTable(
   'ai_models',
@@ -59,4 +60,4 @@ export const aiModels = pgTable(
 );
 
 export type NewAiModelItem = Omit<typeof aiModels.$inferInsert, 'userId'>;
-export type AiModelItem = typeof aiModels.$inferSelect;
+export type AiModelSelectItem = typeof aiModels.$inferSelect;

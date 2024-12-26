@@ -2,7 +2,7 @@ import { and, desc, eq } from 'drizzle-orm/expressions';
 
 import { LobeChatDatabase } from '@/database/type';
 
-import { AiModelItem, NewAiModelItem, aiModels } from '../../schemas';
+import { AiModelSelectItem, NewAiModelItem, aiModels } from '../../schemas';
 
 export class AiModelModel {
   private userId: string;
@@ -45,7 +45,7 @@ export class AiModelModel {
     });
   };
 
-  update = async (id: string, value: Partial<AiModelItem>) => {
+  update = async (id: string, value: Partial<AiModelSelectItem>) => {
     return this.db
       .update(aiModels)
       .set({ ...value, updatedAt: new Date() })

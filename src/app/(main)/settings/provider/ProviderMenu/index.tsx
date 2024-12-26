@@ -1,34 +1,29 @@
 'use client';
 
-import { ActionIcon, SearchBar } from '@lobehub/ui';
-import { Typography } from 'antd';
+import { SearchBar } from '@lobehub/ui';
 import { useTheme } from 'antd-style';
-import isEqual from 'fast-deep-equal';
-import { PlusIcon } from 'lucide-react';
-import { useState } from 'react';
+import { PropsWithChildren } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
-import SearchResult from '@/app/(main)/settings/provider/ProviderMenu/SearchResult';
-import { useUserStore } from '@/store/user';
-import { modelProviderSelectors } from '@/store/user/selectors';
+import { useAiInfraStore } from '@/store/aiInfra/store';
 
-import All from './All';
-import ProviderItem from './Item';
+import AddNew from './AddNew';
+import ProviderList from './List';
+import SearchResult from './SearchResult';
+import SkeletonList from './SkeletonList';
 
-const ProviderMenu = () => {
+const Layout = ({ children }: PropsWithChildren) => {
   const { t } = useTranslation('modelProvider');
-  const [searchKeyword, setSearchKeyword] = useState('');
   const theme = useTheme();
 
-  const enabledModelProviderList = useUserStore(
-    modelProviderSelectors.enabledModelProviderList,
-    isEqual,
-  );
-  const disabledModelProviderList = useUserStore(
-    modelProviderSelectors.disabledModelProviderList,
-    isEqual,
-  );
+  const [providerSearchKeyword, useFetchAiProviderList] = useAiInfraStore((s) => [
+    s.providerSearchKeyword,
+    s.useFetchAiProviderList,
+    s.initAiProviderList,
+  ]);
+
+  useFetchAiProviderList();
 
   return (
     <Flexbox style={{ minWidth: 280, overflow: 'scroll' }} width={280}>
@@ -41,34 +36,38 @@ const ProviderMenu = () => {
       >
         <SearchBar
           allowClear
-          onChange={(e) => setSearchKeyword(e.target.value)}
+          onChange={(e) => useAiInfraStore.setState({ providerSearchKeyword: e.target.value })}
           placeholder={t('menu.searchProviders')}
           type={'block'}
-          value={searchKeyword}
+          value={providerSearchKeyword}
         />
-        <ActionIcon disable icon={PlusIcon} title={'添加自定义服务商(敬请期待)'} />
+        <AddNew />
       </Flexbox>
-      {!!searchKeyword ? (
-        <SearchResult searchKeyword={searchKeyword} />
-      ) : (
-        <Flexbox gap={4} padding={'0 12px'}>
-          <All />
-          <Typography.Text style={{ fontSize: 12, marginTop: 8 }} type={'secondary'}>
-            已启用
-          </Typography.Text>
-          {enabledModelProviderList.map((item) => (
-            <ProviderItem {...item} key={item.id} />
-          ))}
-          <Typography.Text style={{ fontSize: 12, marginTop: 8 }} type={'secondary'}>
-            未启用
-          </Typography.Text>
-          {disabledModelProviderList.map((item) => (
-            <ProviderItem {...item} key={item.id} />
-          ))}
-        </Flexbox>
-      )}
+      {children}
     </Flexbox>
   );
 };
+
+const Content = () => {
+  const [initAiProviderList, providerSearchKeyword] = useAiInfraStore((s) => [
+    s.initAiProviderList,
+    s.providerSearchKeyword,
+  ]);
+
+  // loading
+  if (!initAiProviderList) return <SkeletonList />;
+
+  // search
+  if (!!providerSearchKeyword) return <SearchResult />;
+
+  // default
+  return <ProviderList />;
+};
+
+const ProviderMenu = () => (
+  <Layout>
+    <Content />
+  </Layout>
+);
 
 export default ProviderMenu;

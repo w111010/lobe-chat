@@ -223,7 +223,10 @@
     "hash": "9646161fa041354714f823d726af27247bcd6e60fa3be5698c0d69f337a5700b"
   },
   {
-    "sql": ["DROP TABLE \"user_budgets\";", "\nDROP TABLE \"user_subscriptions\";"],
+    "sql": [
+      "DROP TABLE \"user_budgets\";",
+      "\nDROP TABLE \"user_subscriptions\";"
+    ],
     "bps": true,
     "folderMillis": 1729699958471,
     "hash": "7dad43a2a25d1aec82124a4e53f8d82f8505c3073f23606c1dc5d2a4598eacf9"
@@ -293,5 +296,13 @@
     "bps": true,
     "folderMillis": 1735206779232,
     "hash": "77b89e8d8412933bb5e6968e0c38140edefd352e97fac8bdb2f03706b0cd1411"
+  },
+  {
+    "sql": [
+      "ALTER TABLE \"ai_providers\" ADD COLUMN \"source\" varchar(20);"
+    ],
+    "bps": true,
+    "folderMillis": 1735230687991,
+    "hash": "ebad51ea0b57338bd16286e70ed72bfa406f06e81c889835b0a236543435de95"
   }
 ]

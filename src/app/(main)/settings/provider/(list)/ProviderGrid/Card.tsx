@@ -1,14 +1,14 @@
-import { ProviderCombine } from '@lobehub/icons';
-import { Divider, Switch, Typography } from 'antd';
+import { ProviderCombine, ProviderIcon } from '@lobehub/icons';
+import { Avatar } from '@lobehub/ui';
+import { Divider, Skeleton, Switch, Typography } from 'antd';
 import { createStyles } from 'antd-style';
 import Link from 'next/link';
 import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
-import { useUserStore } from '@/store/user';
-import { modelProviderSelectors } from '@/store/user/selectors';
-import { ModelProviderCard } from '@/types/llm';
+import { aiProviderSelectors, useAiInfraStore } from '@/store/aiInfra';
+import { AiProviderListItem } from '@/types/aiProvider';
 
 const { Paragraph } = Typography;
 
@@ -61,50 +61,74 @@ const useStyles = createStyles(({ css, token, isDarkMode }) => ({
   `,
 }));
 
-export interface ProviderCardProps extends ModelProviderCard {
-  mobile?: boolean;
+interface ProviderCardProps extends AiProviderListItem {
+  loading?: boolean;
 }
+const ProviderCard = memo<ProviderCardProps>(
+  ({ id, description, name, enabled, source, logo, loading }) => {
+    const { t } = useTranslation('providers');
+    const { cx, styles, theme } = useStyles();
+    const toggleProviderEnabled = useAiInfraStore((s) => s.toggleProviderEnabled);
+    const isProviderLoading = useAiInfraStore(aiProviderSelectors.isProviderLoading(id));
 
-const ProviderCard = memo<ProviderCardProps>(({ id, description, name }) => {
-  const { t } = useTranslation('providers');
-  const { cx, styles, theme } = useStyles();
-  const [toggleProviderEnabled] = useUserStore((s) => [s.toggleProviderEnabled]);
-  const enabled = useUserStore(modelProviderSelectors.isProviderEnabled(id as any));
-  const [checked, setChecked] = useState(enabled);
+    const [checked, setChecked] = useState(enabled);
 
-  return (
-    <Flexbox className={cx(styles.container)} gap={24}>
-      <Flexbox gap={12} padding={16} width={'100%'}>
-        <Flexbox align={'center'} horizontal justify={'space-between'}>
-          <Link href={`/settings/provider/${id}`}>
-            <ProviderCombine
-              provider={id}
-              size={24}
-              style={{ color: theme.colorText }}
-              title={name}
-            />
-          </Link>
+    if (loading)
+      return (
+        <Flexbox className={cx(styles.container)} gap={24} padding={16}>
+          <Skeleton active />
         </Flexbox>
-        {description && (
+      );
+
+    return (
+      <Flexbox className={cx(styles.container)} gap={24}>
+        <Flexbox gap={12} padding={16} width={'100%'}>
+          <Flexbox align={'center'} horizontal justify={'space-between'}>
+            <Link href={`/settings/provider/${id}`}>
+              {source === 'builtin' ? (
+                <ProviderCombine
+                  provider={id}
+                  size={24}
+                  style={{ color: theme.colorText }}
+                  title={name}
+                />
+              ) : (
+                <Flexbox align={'center'} gap={12} horizontal>
+                  {logo ? (
+                    <Avatar alt={name || id} avatar={logo} size={28} />
+                  ) : (
+                    <ProviderIcon
+                      provider={id}
+                      size={24}
+                      style={{ borderRadius: 6 }}
+                      type={'avatar'}
+                    />
+                  )}
+                  <Typography.Text>{name || id}</Typography.Text>
+                </Flexbox>
+              )}
+            </Link>
+          </Flexbox>
           <Paragraph className={styles.desc} ellipsis={{ rows: 2, tooltip: true }}>
-            {t(`${id}.description`)}
+            {source === 'custom' ? description : t(`${id}.description`)}
           </Paragraph>
-        )}
-        <Divider style={{ margin: '4px 0' }} />
-        <Flexbox horizontal justify={'space-between'} paddingBlock={'8px 0'}>
-          <div />
-          <Switch
-            checked={checked}
-            onChange={(checked) => {
-              setChecked(checked);
-              toggleProviderEnabled(id as any, checked);
-            }}
-            // size={'small'}
-          />
+          <Divider style={{ margin: '4px 0' }} />
+          <Flexbox horizontal justify={'space-between'} paddingBlock={'8px 0'}>
+            <div />
+            <Switch
+              checked={checked}
+              loading={isProviderLoading}
+              onChange={(checked) => {
+                setChecked(checked);
+                toggleProviderEnabled(id, checked);
+              }}
+              size={'small'}
+            />
+          </Flexbox>
         </Flexbox>
       </Flexbox>
-    </Flexbox>
-  );
-});
+    );
+  },
+);
 
 export default ProviderCard;
