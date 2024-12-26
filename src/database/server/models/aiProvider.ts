@@ -139,9 +139,18 @@ export class AiProviderModel {
   };
 
   getAiProviderById = async (id: string, decryptor: DecryptUserKeyVaults) => {
-    const result = await this.db.query.aiProviders.findFirst({
-      where: and(eq(aiProviders.id, id), eq(aiProviders.userId, this.userId)),
-    });
+    const [result] = await this.db
+      .select({
+        checkModel: aiProviders.checkModel,
+        config: aiProviders.config,
+        enabledChatModels: aiProviders.enabledChatModels,
+        id: aiProviders.id,
+        keyVaults: aiProviders.keyVaults,
+        name: aiProviders.name,
+      })
+      .from(aiProviders)
+      .where(and(eq(aiProviders.id, id), eq(aiProviders.userId, this.userId)))
+      .limit(1);
 
     if (!result) throw new Error(`provider ${id} not found`);
 

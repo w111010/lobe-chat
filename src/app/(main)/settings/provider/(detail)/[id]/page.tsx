@@ -26,7 +26,12 @@ import UpstageProvider from '@/config/modelProviders/upstage';
 import XAIProvider from '@/config/modelProviders/xai';
 import ZeroOneProvider from '@/config/modelProviders/zeroone';
 import ZhiPuProvider from '@/config/modelProviders/zhipu';
+import { isServerMode } from '@/const/version';
+import { serverDB } from '@/database/server';
+import { AiProviderModel } from '@/database/server/models/aiProvider';
+import { KeyVaultsGateKeeper } from '@/server/modules/KeyVaultsEncrypt';
 import { PagePropsWithId } from '@/types/next';
+import { getUserAuth } from '@/utils/server/auth';
 
 import ProviderDetail from './index';
 
@@ -64,10 +69,23 @@ const DEFAULT_MODEL_PROVIDER_LIST = [
 const Page = async (props: PagePropsWithId) => {
   const params = await props.params;
 
-  const card = DEFAULT_MODEL_PROVIDER_LIST.find((v) => v.id === params.id);
-  if (!card) return <div>not found</div>;
+  const builtinProviderCard = DEFAULT_MODEL_PROVIDER_LIST.find((v) => v.id === params.id);
+  if (!!builtinProviderCard) return <ProviderDetail {...builtinProviderCard} />;
 
-  return <ProviderDetail {...card} />;
+  if (isServerMode) {
+    const { userId } = await getUserAuth();
+
+    const aiProviderModel = new AiProviderModel(serverDB, userId!);
+
+    const userCard = await aiProviderModel.getAiProviderById(
+      params.id,
+      KeyVaultsGateKeeper.getUserKeyVaults,
+    );
+    console.log(userCard);
+    if (userCard) return <ProviderDetail {...userCard} />;
+  }
+
+  return <div>not found</div>;
 };
 
 export default Page;
