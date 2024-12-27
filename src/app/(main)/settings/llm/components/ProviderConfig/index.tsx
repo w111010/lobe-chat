@@ -142,7 +142,7 @@ const ProviderConfig = memo<ProviderConfigProps>(
 
     const apiKeyItem: FormItemProps[] = !showApiKey
       ? []
-      : (apiKeyItems ?? [
+      : (apiKeyItems?.({ t }) ?? [
           {
             children: (
               <Input.Password

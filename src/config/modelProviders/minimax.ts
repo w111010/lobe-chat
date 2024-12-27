@@ -1,7 +1,26 @@
 import { ModelProviderCard } from '@/types/llm';
+import { Input } from 'antd';
+import React from 'react';
 
-// ref: https://platform.minimaxi.com/document/Models
 const Minimax: ModelProviderCard = {
+  apiKeyItems: ({ t }) => [
+    {
+      children: React.createElement(Input.Password, {
+        placeholder: t('llm.apiKey.placeholder', { name: 'Minimax' }),
+      }),
+      desc: t('llm.apiKey.desc', { name: 'Minimax' }),
+      label: t('llm.apiKey.title'),
+      name: ['keyVaults', 'minimaxi', 'apiKey'],
+    },
+    {
+      children: React.createElement(Input, {
+        placeholder: t('llm.groupId.placeholder', { name: 'Minimax' }),
+      }),
+      desc: t('llm.groupId.desc', { name: 'Minimax' }),
+      label: t('llm.groupId.title'),
+      name: ['keyVaults', 'minimaxi', 'groupId'],
+    },
+  ],
   chatModels: [
     {
       contextWindowTokens: 245_760,
@@ -48,7 +67,6 @@ const Minimax: ModelProviderCard = {
   name: 'Minimax',
   smoothing: {
     speed: 2,
-    text: true,
   },
   url: 'https://www.minimaxi.com',
 };
