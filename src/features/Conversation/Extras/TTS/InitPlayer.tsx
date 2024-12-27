@@ -1,11 +1,11 @@
-import { memo, useCallback, useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useTTS } from '@/hooks/useTTS';
 import { useChatStore } from '@/store/chat';
 import { useFileStore } from '@/store/file';
 import { ChatMessageError, ChatTTS } from '@/types/message';
-import { getMessageError } from '@/utils/fetch';
+import { TTSHookResult } from '@/types/tts';
 
 import Player from './Player';
 
@@ -15,7 +15,7 @@ export interface TTSProps extends ChatTTS {
   loading?: boolean;
 }
 
-const InitPlayer = memo<TTSProps>(({ id, content, contentMd5, file }) => {
+const InitPlayer: React.FC<TTSProps> = memo(({ id, content, contentMd5, file }) => {
   const [isStart, setIsStart] = useState(false);
   const [error, setError] = useState<ChatMessageError>();
   const uploadTTS = useFileStore((s) => s.uploadTTSByArrayBuffers);
@@ -30,30 +30,25 @@ const InitPlayer = memo<TTSProps>(({ id, content, contentMd5, file }) => {
     [t],
   );
 
-  const { isGlobalLoading, audio, start, stop, response } = useTTS(content, {
+  const ttsResult = useTTS(content, {
     onError: (err) => {
-      stop();
+      ttsResult.stop();
       setDefaultError(err);
     },
     onErrorRetry: (err) => {
-      stop();
+      ttsResult.stop();
       setDefaultError(err);
     },
-    onSuccess: async () => {
-      if (!response || response.ok) return;
-      const message = await getMessageError(response);
-      if (message) {
-        setError(message);
-      } else {
-        setDefaultError();
-      }
-      stop();
+    onSuccess: () => {
+      // Success case is handled by the TTS hook internally
     },
     onUpload: async (currentVoice, arrayBuffers) => {
       const fileID = await uploadTTS(id, arrayBuffers);
       ttsMessage(id, { contentMd5, file: fileID, voice: currentVoice });
     },
-  });
+  }) as TTSHookResult;
+
+  const { isGlobalLoading, start, stop, audio } = ttsResult;
 
   const handleInitStart = useCallback(() => {
     if (isStart) return;
