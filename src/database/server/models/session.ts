@@ -5,9 +5,15 @@ import { appEnv } from '@/config/app';
 import { INBOX_SESSION_ID } from '@/const/session';
 import { DEFAULT_AGENT_CONFIG } from '@/const/settings';
 import { LobeChatDatabase } from '@/database/type';
+import {
+  genEndDateWhere,
+  genRangeWhere,
+  genStartDateWhere,
+  genWhere,
+} from '@/database/utils/genWhere';
 import { idGenerator } from '@/database/utils/idGenerator';
 import { parseAgentConfig } from '@/server/globalConfig/parseDefaultAgent';
-import { ChatSessionList, LobeAgentSession } from '@/types/session';
+import { ChatSessionList, LobeAgentSession, SessionRankItem } from '@/types/session';
 import { merge } from '@/utils/merge';
 
 import {
@@ -19,6 +25,7 @@ import {
   agentsToSessions,
   sessionGroups,
   sessions,
+  topics,
 } from '../../schemas';
 
 export class SessionModel {
@@ -84,15 +91,50 @@ export class SessionModel {
     return { ...result, agent: (result?.agentsToSessions?.[0] as any)?.agent } as any;
   };
 
-  count = async (): Promise<number> => {
+  count = async (params?: {
+    endDate?: string;
+    range?: [string, string];
+    startDate?: string;
+  }): Promise<number> => {
     const result = await this.db
       .select({
         count: count(sessions.id),
       })
       .from(sessions)
-      .where(eq(sessions.userId, this.userId));
+      .where(
+        genWhere([
+          eq(sessions.userId, this.userId),
+          params?.range
+            ? genRangeWhere(params.range, sessions.createdAt, (date) => date.toDate())
+            : undefined,
+          params?.endDate
+            ? genEndDateWhere(params.endDate, sessions.createdAt, (date) => date.toDate())
+            : undefined,
+          params?.startDate
+            ? genStartDateWhere(params.startDate, sessions.createdAt, (date) => date.toDate())
+            : undefined,
+        ]),
+      );
 
     return result[0].count;
+  };
+
+  rank = async (limit: number = 10): Promise<SessionRankItem[]> => {
+    return this.db
+      .select({
+        avatar: agents.avatar,
+        backgroundColor: agents.backgroundColor,
+        count: count(topics.id).as('count'),
+        id: sessions.id,
+        title: agents.title,
+      })
+      .from(sessions)
+      .leftJoin(topics, eq(sessions.id, topics.sessionId))
+      .leftJoin(agentsToSessions, eq(sessions.id, agentsToSessions.sessionId))
+      .leftJoin(agents, eq(agentsToSessions.agentId, agents.id))
+      .groupBy(sessions.id, agentsToSessions.agentId, agents.id)
+      .orderBy(desc(sql`count`))
+      .limit(limit);
   };
 
   hasMoreThanN = async (n: number): Promise<boolean> => {

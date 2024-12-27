@@ -36,12 +36,12 @@ export class ServerService implements IMessageService {
     });
   };
 
-  countMessages: IMessageService['countMessages'] = async () => {
-    return lambdaClient.message.count.query();
+  countMessages: IMessageService['countMessages'] = async (params) => {
+    return lambdaClient.message.count.query(params);
   };
 
-  countTodayMessages: IMessageService['countTodayMessages'] = async () => {
-    return lambdaClient.message.countToday.query();
+  getHeatmaps: IMessageService['getHeatmaps'] = async () => {
+    return lambdaClient.message.getHeatmaps.query();
   };
 
   updateMessageError: IMessageService['updateMessageError'] = async (id, error) => {
