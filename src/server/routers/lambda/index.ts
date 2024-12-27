@@ -4,6 +4,7 @@
 import { publicProcedure, router } from '@/libs/trpc';
 
 import { agentRouter } from './agent';
+import { aiProviderRouter } from './aiProvider';
 import { chunkRouter } from './chunk';
 import { fileRouter } from './file';
 import { importerRouter } from './importer';
@@ -19,6 +20,7 @@ import { userRouter } from './user';
 
 export const lambdaRouter = router({
   agent: agentRouter,
+  aiProvider: aiProviderRouter,
   chunk: chunkRouter,
   file: fileRouter,
   healthcheck: publicProcedure.query(() => "i'm live!"),
