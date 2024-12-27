@@ -20,9 +20,20 @@ interface VirtualizedListProps {
   mobile?: boolean;
 }
 
+const EmptyState = () => (
+  <Center height={'100%'}>
+    <div>No items to display</div>
+  </Center>
+);
+
 const VirtualizedList = memo<VirtualizedListProps>(({ mobile, dataSource, itemContent }) => {
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const [atBottom, setAtBottom] = useState(true);
+  
+  if (!dataSource || dataSource.length === 0) {
+    console.debug('[VirtualizedList] No items to render');
+    return <EmptyState />;
+  }
   const [isScrolling, setIsScrolling] = useState(false);
 
   const [id, isFirstLoading, isCurrentChatLoaded] = useChatStore((s) => [
