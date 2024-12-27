@@ -1,5 +1,5 @@
 import { lambdaClient } from '@/libs/trpc/client';
-import { AiProviderSortMap, CreateAiProviderParams } from '@/types/aiProvider';
+import { AiProviderSortMap, CreateAiProviderParams, UpdateAiProviderConfigParams } from '@/types/aiProvider';
 
 class AiProviderService {
   createAiProvider = async (params: CreateAiProviderParams) => {
@@ -20,6 +20,10 @@ class AiProviderService {
 
   updateAiProvider = async (id: string, value: any) => {
     return lambdaClient.aiProvider.updateAiProvider.mutate({ id, value });
+  };
+
+  updateAiProviderConfig = async (id: string, value: UpdateAiProviderConfigParams) => {
+    return lambdaClient.aiProvider.updateAiProviderConfig.mutate({ id, value });
   };
 
   updateAiProviderOrder = async (items: AiProviderSortMap[]) => {

@@ -9,6 +9,7 @@ import {
   AiProviderListItem,
   AiProviderSortMap,
   CreateAiProviderParams,
+  UpdateAiProviderConfigParams,
 } from '@/types/aiProvider';
 
 const FETCH_AI_PROVIDER_LIST_KEY = 'FETCH_AI_PROVIDER';
@@ -22,6 +23,7 @@ export interface AiProviderAction {
   removeAiProvider: (id: string) => Promise<void>;
   toggleProviderEnabled: (id: string, enabled: boolean) => Promise<void>;
   updateAiProvider: (id: string, value: CreateAiProviderParams) => Promise<void>;
+  updateAiProviderConfig: (id: string, value: UpdateAiProviderConfigParams) => Promise<void>;
   updateAiProviderSort: (items: AiProviderSortMap[]) => Promise<void>;
 
   useFetchAiProviderItem: (id: string) => SWRResponse<AiProviderDetailItem | undefined>;
@@ -73,13 +75,28 @@ export const createCrudSlice: StateCreator<
     get().internal_toggleAiProviderLoading(id, false);
   },
 
+  updateAiProviderConfig: async (id, value) => {
+    get().internal_toggleAiProviderLoading(id, true);
+    await aiProviderService.updateAiProviderConfig(id, value);
+
+    get().internal_toggleAiProviderLoading(id, false);
+  },
+
   updateAiProviderSort: async (items) => {
     await aiProviderService.updateAiProviderOrder(items);
     await get().refreshAiProviderList();
   },
   useFetchAiProviderItem: (id) =>
-    useClientDataSWR<AiProviderDetailItem | undefined>([FETCH_AI_PROVIDER_ITEM_KEY, id], () =>
-      aiProviderService.getAiProviderById(id),
+    useClientDataSWR<AiProviderDetailItem | undefined>(
+      [FETCH_AI_PROVIDER_ITEM_KEY, id],
+      () => aiProviderService.getAiProviderById(id),
+      {
+        onSuccess: (data) => {
+          if (!data) return;
+
+          set({ activeAiProvider: id, aiProviderDetail: data }, false, 'useFetchAiProviderItem');
+        },
+      },
     ),
 
   useFetchAiProviderList: (params = {}) =>

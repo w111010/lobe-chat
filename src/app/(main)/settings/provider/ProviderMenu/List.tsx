@@ -29,7 +29,7 @@ const ProviderList = () => {
   );
 
   return (
-    <Flexbox gap={4} padding={'0 12px'}>
+    <Flexbox gap={4} padding={'0 12px'} style={{ marginBottom: 12 }}>
       <All />
       <Flexbox
         align={'center'}

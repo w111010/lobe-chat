@@ -1,8 +1,11 @@
-import { AiProviderListItem } from '@/types/aiProvider';
+import { AiProviderDetailItem, AiProviderListItem } from '@/types/aiProvider';
 
 export interface AIProviderState {
+  activeAiProvider?: string;
+  aiProviderDetail?: AiProviderDetailItem | null;
   aiProviderList: AiProviderListItem[];
   aiProviderLoadingIds: string[];
+  // providerDetailLoading
   initAiProviderList: boolean;
   providerSearchKeyword: string;
 }

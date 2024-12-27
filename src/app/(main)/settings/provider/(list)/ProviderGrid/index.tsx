@@ -13,23 +13,19 @@ import { aiProviderSelectors, useAiInfraStore } from '@/store/aiInfra';
 import Card from './Card';
 
 const useStyles = createStyles(({ css, responsive, token }) => ({
-  container: css`
-    display: grid;
-    grid-gap: 12px;
-    grid-template-columns: repeat(3, 1fr);
-
-    width: 100%;
-    ${responsive.mobile} {
-      display: flex;
-      flex-direction: column;
-    }
-  `,
   count: css`
     border-radius: 12px;
     background: ${token.colorFillSecondary};
     color: ${token.colorTextDescription};
     height: 20px;
-    width: 20px;
+    padding: 0 6px;
+  `,
+  grid: css`
+    grid-template-columns: repeat(2, 1fr);
+
+    ${responsive.desktop} {
+      grid-template-columns: repeat(3, 1fr);
+    }
   `,
 }));
 
@@ -69,7 +65,7 @@ const List = memo(() => {
           </Typography.Text>
           <Center className={styles.count}>{enabledList.length}</Center>
         </Flexbox>
-        <Grid>
+        <Grid className={styles.grid}>
           {enabledList.map((item) => (
             <Card {...item} key={item.id} />
           ))}
@@ -79,7 +75,7 @@ const List = memo(() => {
         <Typography.Text style={{ fontSize: 16, fontWeight: 'bold' }}>
           {t('list.title.disabled')}
         </Typography.Text>
-        <Grid>
+        <Grid className={styles.grid}>
           {disabledList.map((item) => (
             <Card {...item} key={item.id} />
           ))}

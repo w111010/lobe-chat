@@ -3,23 +3,29 @@
 import { Input, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
 
-import ProviderDetail from '../[id]';
 import { BedrockProviderCard } from '@/config/modelProviders';
+import { aiProviderSelectors, useAiInfraStore } from '@/store/aiInfra';
 import { GlobalLLMProviderKey } from '@/types/user/settings';
 
 import { KeyVaultsConfigKey } from '../../const';
+import { SkeletonInput } from '../../features/ProviderConfig';
 import { ProviderItem } from '../../type';
+import ProviderDetail from '../[id]';
 
 const providerKey: GlobalLLMProviderKey = 'bedrock';
 
 const useBedrockCard = (): ProviderItem => {
   const { t } = useTranslation('modelProvider');
 
+  const isLoading = useAiInfraStore(aiProviderSelectors.isAiProviderConfigLoading(providerKey));
+
   return {
     ...BedrockProviderCard,
     apiKeyItems: [
       {
-        children: (
+        children: isLoading ? (
+          <SkeletonInput />
+        ) : (
           <Input.Password
             autoComplete={'new-password'}
             placeholder={t(`${providerKey}.accessKeyId.placeholder`)}
@@ -27,10 +33,12 @@ const useBedrockCard = (): ProviderItem => {
         ),
         desc: t(`${providerKey}.accessKeyId.desc`),
         label: t(`${providerKey}.accessKeyId.title`),
-        name: [KeyVaultsConfigKey, providerKey, 'accessKeyId'],
+        name: [KeyVaultsConfigKey, 'accessKeyId'],
       },
       {
-        children: (
+        children: isLoading ? (
+          <SkeletonInput />
+        ) : (
           <Input.Password
             autoComplete={'new-password'}
             placeholder={t(`${providerKey}.secretAccessKey.placeholder`)}
@@ -38,10 +46,12 @@ const useBedrockCard = (): ProviderItem => {
         ),
         desc: t(`${providerKey}.secretAccessKey.desc`),
         label: t(`${providerKey}.secretAccessKey.title`),
-        name: [KeyVaultsConfigKey, providerKey, 'secretAccessKey'],
+        name: [KeyVaultsConfigKey, 'secretAccessKey'],
       },
       {
-        children: (
+        children: isLoading ? (
+          <SkeletonInput />
+        ) : (
           <Input.Password
             autoComplete={'new-password'}
             placeholder={t(`${providerKey}.sessionToken.placeholder`)}
@@ -49,10 +59,12 @@ const useBedrockCard = (): ProviderItem => {
         ),
         desc: t(`${providerKey}.sessionToken.desc`),
         label: t(`${providerKey}.sessionToken.title`),
-        name: [KeyVaultsConfigKey, providerKey, 'sessionToken'],
+        name: [KeyVaultsConfigKey, 'sessionToken'],
       },
       {
-        children: (
+        children: isLoading ? (
+          <SkeletonInput />
+        ) : (
           <Select
             allowClear
             options={['us-east-1', 'us-west-2', 'ap-southeast-1'].map((i) => ({
@@ -64,7 +76,7 @@ const useBedrockCard = (): ProviderItem => {
         ),
         desc: t(`${providerKey}.region.desc`),
         label: t(`${providerKey}.region.title`),
-        name: [KeyVaultsConfigKey, providerKey, 'region'],
+        name: [KeyVaultsConfigKey, 'region'],
       },
     ],
   };

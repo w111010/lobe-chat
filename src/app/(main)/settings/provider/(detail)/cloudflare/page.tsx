@@ -4,9 +4,11 @@ import { Input } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 import { CloudflareProviderCard } from '@/config/modelProviders';
+import { aiProviderSelectors, useAiInfraStore } from '@/store/aiInfra';
 import { GlobalLLMProviderKey } from '@/types/user/settings';
 
 import { KeyVaultsConfigKey } from '../../const';
+import { SkeletonInput } from '../../features/ProviderConfig';
 import { ProviderItem } from '../../type';
 import ProviderDetail from '../[id]';
 
@@ -15,11 +17,15 @@ const providerKey: GlobalLLMProviderKey = 'cloudflare';
 const useProviderCard = (): ProviderItem => {
   const { t } = useTranslation('modelProvider');
 
+  const isLoading = useAiInfraStore(aiProviderSelectors.isAiProviderConfigLoading(providerKey));
+
   return {
     ...CloudflareProviderCard,
     apiKeyItems: [
       {
-        children: (
+        children: isLoading ? (
+          <SkeletonInput />
+        ) : (
           <Input.Password
             autoComplete={'new-password'}
             placeholder={t(`${providerKey}.apiKey.placeholder`)}
@@ -27,13 +33,17 @@ const useProviderCard = (): ProviderItem => {
         ),
         desc: t(`${providerKey}.apiKey.desc`),
         label: t(`${providerKey}.apiKey.title`),
-        name: [KeyVaultsConfigKey, providerKey, 'apiKey'],
+        name: [KeyVaultsConfigKey, 'apiKey'],
       },
       {
-        children: <Input placeholder={t(`${providerKey}.baseURLOrAccountID.placeholder`)} />,
+        children: isLoading ? (
+          <SkeletonInput />
+        ) : (
+          <Input placeholder={t(`${providerKey}.baseURLOrAccountID.placeholder`)} />
+        ),
         desc: t(`${providerKey}.baseURLOrAccountID.desc`),
         label: t(`${providerKey}.baseURLOrAccountID.title`),
-        name: [KeyVaultsConfigKey, providerKey, 'baseURLOrAccountID'],
+        name: [KeyVaultsConfigKey, 'baseURLOrAccountID'],
       },
     ],
   };

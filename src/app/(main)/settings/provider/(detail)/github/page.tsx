@@ -6,9 +6,11 @@ import { createStyles } from 'antd-style';
 import { useTranslation } from 'react-i18next';
 
 import { GithubProviderCard } from '@/config/modelProviders';
+import { aiProviderSelectors, useAiInfraStore } from '@/store/aiInfra';
 import { GlobalLLMProviderKey } from '@/types/user/settings';
 
 import { KeyVaultsConfigKey, LLMProviderApiTokenKey } from '../../const';
+import { SkeletonInput } from '../../features/ProviderConfig';
 import { ProviderItem } from '../../type';
 import ProviderDetail from '../[id]';
 
@@ -30,12 +32,15 @@ const providerKey: GlobalLLMProviderKey = 'github';
 const useProviderCard = (): ProviderItem => {
   const { t } = useTranslation('modelProvider');
   const { styles } = useStyles();
+  const isLoading = useAiInfraStore(aiProviderSelectors.isAiProviderConfigLoading(providerKey));
 
   return {
     ...GithubProviderCard,
     apiKeyItems: [
       {
-        children: (
+        children: isLoading ? (
+          <SkeletonInput />
+        ) : (
           <Input.Password
             autoComplete={'new-password'}
             placeholder={t(`${providerKey}.personalAccessToken.placeholder`)}

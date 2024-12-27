@@ -6,17 +6,18 @@ import {
   AiProviderDetailItem,
   AiProviderListItem,
   CreateAiProviderParams,
+  UpdateAiProviderConfigParams,
 } from '@/types/aiProvider';
 
 import { AiProviderSelectItem, aiProviders } from '../../schemas';
 
 interface AIProviderKeyVaults {
   apiKey?: string;
-  proxyUrl?: string;
+  baseURL?: string;
 }
-type DecryptUserKeyVaults = (encryptKeyVaultsStr: string | null) => Promise<AIProviderKeyVaults>;
+type DecryptUserKeyVaults = (encryptKeyVaultsStr: string | null) => Promise<any>;
 
-type EncryptUserKeyVaults = (keyVaults: AIProviderKeyVaults) => Promise<string>;
+type EncryptUserKeyVaults = (keyVaults: string) => Promise<string>;
 
 export class AiProviderModel {
   private userId: string;
@@ -28,11 +29,13 @@ export class AiProviderModel {
   }
 
   create = async (
-    { apiKey, proxyUrl, ...params }: CreateAiProviderParams,
+    { apiKey, baseURL, ...params }: CreateAiProviderParams,
     encryptor?: EncryptUserKeyVaults,
   ) => {
-    const encrypt = encryptor ?? JSON.stringify;
-    const keyVaults = await encrypt({ apiKey, proxyUrl });
+    // eslint-disable-next-line unicorn/consistent-function-scoping
+    const defaultSerialize = (s: string) => s;
+    const encrypt = encryptor ?? defaultSerialize;
+    const keyVaults = await encrypt(JSON.stringify({ apiKey, baseURL }));
 
     const [result] = await this.db
       .insert(aiProviders)
@@ -95,6 +98,22 @@ export class AiProviderModel {
       .where(and(eq(aiProviders.id, id), eq(aiProviders.userId, this.userId)));
   };
 
+  updateConfig = async (
+    id: string,
+    value: UpdateAiProviderConfigParams,
+    encryptor?: EncryptUserKeyVaults,
+  ) => {
+    // eslint-disable-next-line unicorn/consistent-function-scoping
+    const defaultSerialize = (s: string) => s;
+    const encrypt = encryptor ?? defaultSerialize;
+    const keyVaults = await encrypt(JSON.stringify(value.keyVaults));
+
+    return this.db
+      .update(aiProviders)
+      .set({ ...value, keyVaults, updatedAt: new Date() })
+      .where(and(eq(aiProviders.id, id), eq(aiProviders.userId, this.userId)));
+  };
+
   toggleProviderEnabled = async (id: string, enabled: boolean) => {
     const isBuiltin = Object.values(ModelProvider).includes(id as any);
 
@@ -139,7 +158,7 @@ export class AiProviderModel {
   };
 
   getAiProviderById = async (id: string, decryptor: DecryptUserKeyVaults) => {
-    const [result] = await this.db
+    const query = this.db
       .select({
         checkModel: aiProviders.checkModel,
         config: aiProviders.config,
@@ -152,12 +171,27 @@ export class AiProviderModel {
       .where(and(eq(aiProviders.id, id), eq(aiProviders.userId, this.userId)))
       .limit(1);
 
-    if (!result) throw new Error(`provider ${id} not found`);
+    const [result] = await query;
+
+    if (!result) {
+      // if the provider is builtin but not init, we will insert it to the db
+      if (this.isBuiltInProvider(id)) {
+        await this.db.insert(aiProviders).values({ id, source: 'builtin', userId: this.userId });
+
+        const resultAgain = await query;
+
+        return resultAgain[0];
+      }
+
+      throw new Error(`provider ${id} not found`);
+    }
 
     const decrypt = decryptor ?? JSON.parse;
 
     const keyVaults = await decrypt(result.keyVaults);
 
-    return { ...result, ...keyVaults } as AiProviderDetailItem;
+    return { ...result, keyVaults } as AiProviderDetailItem;
   };
+
+  private isBuiltInProvider = (id: string) => Object.values(ModelProvider).includes(id as any);
 }

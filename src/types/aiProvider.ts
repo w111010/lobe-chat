@@ -5,12 +5,12 @@ import { SmoothingParams } from '@/types/llm';
 // create
 export const CreateAiProviderSchema = z.object({
   apiKey: z.string().optional(),
+  baseURL: z.string().optional(),
   config: z.object({}).passthrough().optional(),
   description: z.string().optional(),
   id: z.string(),
   logo: z.string().optional(),
   name: z.string(),
-  proxyUrl: z.string().optional(),
   sdkType: z.enum(['openai', 'anthropic']).optional(),
 
   // checkModel: z.string().optional(),
@@ -112,11 +112,13 @@ export interface AiProviderDetailItem {
   description?: string;
   enabled: boolean;
   enabledChatModels: string[];
+  fetchOnClient?: boolean;
   /**
    * provider's website url
    */
   homeUrl?: string;
   id: string;
+  keyVaults?: Record<string, any>;
   logo?: string;
   /**
    * the url show the all models in the provider
@@ -134,6 +136,13 @@ export interface AiProviderDetailItem {
 }
 
 // Update
+export const UpdateAiProviderConfigSchema = z.object({
+  checkModel: z.string().optional(),
+  fetchOnClient: z.boolean().optional(),
+  keyVaults: z.object({}).passthrough().optional(),
+});
+
+export type UpdateAiProviderConfigParams = z.infer<typeof UpdateAiProviderConfigSchema>;
 
 export interface AiProviderSortMap {
   id: string;

@@ -26,8 +26,9 @@ const Layout = ({ children }: PropsWithChildren) => {
   useFetchAiProviderList();
 
   return (
-    <Flexbox style={{ minWidth: 280, overflow: 'scroll' }} width={280}>
+    <Flexbox style={{ minWidth: 260, overflow: 'scroll' }} width={260}>
       <Flexbox
+        gap={8}
         horizontal
         justify={'space-between'}
         padding={'16px 12px 12px'}

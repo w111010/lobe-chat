@@ -8,16 +8,23 @@ import { UserModel } from '@/database/server/models/user';
 import { authedProcedure, router } from '@/libs/trpc';
 import { getServerGlobalConfig } from '@/server/globalConfig';
 import { KeyVaultsGateKeeper } from '@/server/modules/KeyVaultsEncrypt';
-import { AiProviderListItem, CreateAiProviderSchema } from '@/types/aiProvider';
+import {
+  AiProviderListItem,
+  CreateAiProviderSchema,
+  UpdateAiProviderConfigSchema,
+} from '@/types/aiProvider';
 import { ProviderConfig } from '@/types/user/settings';
 import { merge } from '@/utils/merge';
 
 const aiProviderProcedure = authedProcedure.use(async (opts) => {
   const { ctx } = opts;
 
+  const gateKeeper = await KeyVaultsGateKeeper.initWithEnvKey();
+
   return opts.next({
     ctx: {
       aiProviderModel: new AiProviderModel(serverDB, ctx.userId),
+      gateKeeper,
       userModel: new UserModel(serverDB, ctx.userId),
     },
   });
@@ -27,11 +34,7 @@ export const aiProviderRouter = router({
   createAiProvider: aiProviderProcedure
     .input(CreateAiProviderSchema)
     .mutation(async ({ input, ctx }) => {
-      const gateKeeper = await KeyVaultsGateKeeper.initWithEnvKey();
-
-      const data = await ctx.aiProviderModel.create(input, (keyVaults) =>
-        gateKeeper.encrypt(JSON.stringify(keyVaults)),
-      );
+      const data = await ctx.aiProviderModel.create(input, ctx.gateKeeper.encrypt);
 
       return data?.id;
     }),
@@ -40,10 +43,7 @@ export const aiProviderRouter = router({
     .input(z.object({ id: z.string() }))
 
     .query(async ({ input, ctx }) => {
-      return ctx.aiProviderModel.getAiProviderById(
-        input.id,
-        (encryptKeyVaultsStr) => KeyVaultsGateKeeper.getUserKeyVaults(encryptKeyVaultsStr) as any,
-      );
+      return ctx.aiProviderModel.getAiProviderById(input.id, KeyVaultsGateKeeper.getUserKeyVaults);
     }),
   getAiProviderList: aiProviderProcedure.query(async ({ ctx }) => {
     const { languageModel } = getServerGlobalConfig();
@@ -98,6 +98,17 @@ export const aiProviderRouter = router({
     )
     .mutation(async ({ input, ctx }) => {
       return ctx.aiProviderModel.update(input.id, input.value);
+    }),
+
+  updateAiProviderConfig: aiProviderProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        value: UpdateAiProviderConfigSchema,
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      return ctx.aiProviderModel.updateConfig(input.id, input.value, ctx.gateKeeper.encrypt);
     }),
 
   updateAiProviderOrder: aiProviderProcedure

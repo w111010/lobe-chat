@@ -11,7 +11,6 @@ import { Flexbox } from 'react-layout-kit';
 import { ModelInfoTags } from '@/components/ModelSelect';
 import { useUserStore } from '@/store/user';
 import { modelProviderSelectors } from '@/store/user/selectors';
-import { oneLineEllipsis } from '@/styles';
 import { ModelPricing } from '@/types/llm';
 
 export const useStyles = createStyles(({ css, token, cx }) => {
@@ -106,27 +105,12 @@ const OptionRender = memo<OptionRenderProps>(
             </Flexbox>
             <Flexbox align={'baseline'} gap={8} horizontal>
               {content.length > 0 && (
-                <>
-                  <Typography.Text
+                <Typography.Text
                     style={{ color: theme.colorTextSecondary, fontSize: 12, marginBottom: 0 }}
                   >
                     {content.join(' · ')}
                   </Typography.Text>
-                  <Typography.Text style={{ fontSize: 12, marginBottom: 0 }} type={'secondary'}>
-                    |
-                  </Typography.Text>
-                </>
               )}
-              <span className={styles.desc}>
-                <Typography.Text
-                  className={oneLineEllipsis}
-                  ellipsis={{ tooltip: true }}
-                  style={{ fontSize: 12, marginBottom: 0 }}
-                  type={'secondary'}
-                >
-                  {t(`${id}.description`, { defaultValue: id, ns: 'models' })}
-                </Typography.Text>
-              </span>
             </Flexbox>
           </Flexbox>
         </Flexbox>

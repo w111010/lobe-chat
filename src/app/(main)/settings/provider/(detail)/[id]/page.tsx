@@ -81,7 +81,7 @@ const Page = async (props: PagePropsWithId) => {
       params.id,
       KeyVaultsGateKeeper.getUserKeyVaults,
     );
-    console.log(userCard);
+
     if (userCard) return <ProviderDetail {...userCard} />;
   }
 

@@ -5,7 +5,9 @@ import { Input } from 'antd';
 import { createStyles } from 'antd-style';
 import { useTranslation } from 'react-i18next';
 
+import { SkeletonInput } from '../../features/ProviderConfig';
 import { HuggingFaceProviderCard } from '@/config/modelProviders';
+import { aiProviderSelectors, useAiInfraStore } from '@/store/aiInfra';
 import { GlobalLLMProviderKey } from '@/types/user/settings';
 
 import { KeyVaultsConfigKey, LLMProviderApiTokenKey } from '../../const';
@@ -30,12 +32,15 @@ const providerKey: GlobalLLMProviderKey = 'huggingface';
 const useProviderCard = (): ProviderItem => {
   const { t } = useTranslation('modelProvider');
   const { styles } = useStyles();
+  const isLoading = useAiInfraStore(aiProviderSelectors.isAiProviderConfigLoading(providerKey));
 
   return {
     ...HuggingFaceProviderCard,
     apiKeyItems: [
       {
-        children: (
+        children: isLoading ? (
+          <SkeletonInput />
+        ) : (
           <Input.Password
             autoComplete={'new-password'}
             placeholder={t(`${providerKey}.accessToken.placeholder`)}

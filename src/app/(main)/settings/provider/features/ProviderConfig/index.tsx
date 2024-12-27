@@ -2,31 +2,27 @@
 
 import { ProviderCombine } from '@lobehub/icons';
 import { Form, type FormItemProps, Icon, type ItemGroup, Tooltip } from '@lobehub/ui';
-import { Input, Switch } from 'antd';
+import { useDebounceFn } from 'ahooks';
+import { Input, Skeleton, Switch } from 'antd';
 import { createStyles } from 'antd-style';
-import { debounce } from 'lodash-es';
 import { LockIcon } from 'lucide-react';
 import Link from 'next/link';
-import { ReactNode, memo } from 'react';
+import { ReactNode, memo, useLayoutEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { Center, Flexbox } from 'react-layout-kit';
 import urlJoin from 'url-join';
 
-import { useSyncSettings } from '@/app/(main)/settings/hooks/useSyncSettings';
 import { FORM_STYLE } from '@/const/layoutTokens';
 import { AES_GCM_URL, BASE_PROVIDER_DOC_URL } from '@/const/url';
 import { isServerMode } from '@/const/version';
+import { aiProviderSelectors, useAiInfraStore } from '@/store/aiInfra';
 import { useUserStore } from '@/store/user';
 import { keyVaultsConfigSelectors, modelConfigSelectors } from '@/store/user/selectors';
 import { ModelProviderCard } from '@/types/llm';
 
-import {
-  KeyVaultsConfigKey,
-  LLMProviderApiTokenKey,
-  LLMProviderBaseUrlKey,
-  LLMProviderConfigKey,
-} from '../../const';
-import Checker from '../Checker';
+import { KeyVaultsConfigKey, LLMProviderApiTokenKey, LLMProviderBaseUrlKey } from '../../const';
+import Checker from './Checker';
+import { SkeletonInput } from './SkeletonInput';
 
 const useStyles = createStyles(({ css, prefixCls, responsive, token }) => ({
   aceGcm: css`
@@ -77,6 +73,12 @@ const useStyles = createStyles(({ css, prefixCls, responsive, token }) => ({
       background: ${token.colorFill};
     }
   `,
+  switchLoading: css`
+    width: 44px !important;
+    height: 22px !important;
+    border-radius: 12px !important;
+    min-width: 44px !important;
+  `,
 }));
 
 export interface ProviderConfigProps extends Omit<ModelProviderCard, 'id' | 'chatModels'> {
@@ -118,29 +120,46 @@ const ProviderConfig = memo<ProviderConfigProps>(
     const { t } = useTranslation('setting');
     const [form] = Form.useForm();
     const { cx, styles } = useStyles();
+    const [isFetchOnClient, isProviderEndpointNotEmpty, isProviderApiKeyNotEmpty] = useUserStore(
+      (s) => [
+        modelConfigSelectors.isProviderFetchOnClient(id)(s),
+        keyVaultsConfigSelectors.isProviderEndpointNotEmpty(id)(s),
+        keyVaultsConfigSelectors.isProviderApiKeyNotEmpty(id)(s),
+      ],
+    );
+
     const [
       toggleProviderEnabled,
-      setSettings,
+      useFetchAiProviderItem,
+      updateAiProviderConfig,
       enabled,
-      isFetchOnClient,
-      isProviderEndpointNotEmpty,
-      isProviderApiKeyNotEmpty,
-    ] = useUserStore((s) => [
+      isLoading,
+    ] = useAiInfraStore((s) => [
       s.toggleProviderEnabled,
-      s.setSettings,
-      modelConfigSelectors.isProviderEnabled(id as any)(s),
-      modelConfigSelectors.isProviderFetchOnClient(id)(s),
-      keyVaultsConfigSelectors.isProviderEndpointNotEmpty(id)(s),
-      keyVaultsConfigSelectors.isProviderApiKeyNotEmpty(id)(s),
+      s.useFetchAiProviderItem,
+      s.updateAiProviderConfig,
+      aiProviderSelectors.isProviderEnabled(id)(s),
+      aiProviderSelectors.isAiProviderConfigLoading(id)(s),
     ]);
 
-    useSyncSettings(form);
+    const { data } = useFetchAiProviderItem(id);
+
+    useLayoutEffect(() => {
+      if (isLoading) return;
+
+      // set the first time
+      form.setFieldsValue(data);
+    }, [isLoading, id, data]);
+
+    const { run: debouncedUpdate } = useDebounceFn(updateAiProviderConfig, { wait: 500 });
 
     const apiKeyItem: FormItemProps[] = !showApiKey
       ? []
       : (apiKeyItems ?? [
           {
-            children: (
+            children: isLoading ? (
+              <SkeletonInput />
+            ) : (
               <Input.Password
                 autoComplete={'new-password'}
                 placeholder={t(`llm.apiKey.placeholder`, { name })}
@@ -148,7 +167,7 @@ const ProviderConfig = memo<ProviderConfigProps>(
             ),
             desc: t(`llm.apiKey.desc`, { name }),
             label: t(`llm.apiKey.title`),
-            name: [KeyVaultsConfigKey, id, LLMProviderApiTokenKey],
+            name: [KeyVaultsConfigKey, LLMProviderApiTokenKey],
           },
         ]);
 
@@ -174,10 +193,14 @@ const ProviderConfig = memo<ProviderConfigProps>(
     const formItems = [
       ...apiKeyItem,
       showEndpoint && {
-        children: <Input allowClear placeholder={proxyUrl?.placeholder} />,
+        children: isLoading ? (
+          <SkeletonInput />
+        ) : (
+          <Input allowClear placeholder={proxyUrl?.placeholder} />
+        ),
         desc: proxyUrl?.desc || t('llm.proxyUrl.desc'),
         label: proxyUrl?.title || t('llm.proxyUrl.title'),
-        name: [KeyVaultsConfigKey, id, LLMProviderBaseUrlKey],
+        name: [KeyVaultsConfigKey, LLMProviderBaseUrlKey],
       },
       /*
        * Conditions to show Client Fetch Switch
@@ -190,35 +213,23 @@ const ProviderConfig = memo<ProviderConfigProps>(
         (defaultShowBrowserRequest ||
           (showEndpoint && isProviderEndpointNotEmpty) ||
           (showApiKey && isProviderApiKeyNotEmpty)) && {
-          children: (
-            <Switch
-              onChange={(enabled) => {
-                setSettings({ [LLMProviderConfigKey]: { [id]: { fetchOnClient: enabled } } });
-              }}
-              value={isFetchOnClient}
-            />
+          children: isLoading ? (
+            <Skeleton.Button active className={styles.switchLoading} />
+          ) : (
+            <Switch disabled={isLoading} value={isFetchOnClient} />
           ),
           desc: t('llm.fetchOnClient.desc'),
           label: t('llm.fetchOnClient.title'),
           minWidth: undefined,
+          name: 'fetchOnClient',
         },
-      // {
-      //   children: (
-      //     <ProviderModelListSelect
-      //       notFoundContent={modelList?.notFoundContent}
-      //       placeholder={modelList?.placeholder ?? t('llm.modelList.placeholder')}
-      //       provider={id}
-      //       showAzureDeployName={modelList?.azureDeployName}
-      //       showModelFetcher={modelList?.showModelFetcher}
-      //     />
-      //   ),
-      //   desc: t('llm.modelList.desc'),
-      //   label: t('llm.modelList.title'),
-      //   name: [LLMProviderConfigKey, id, LLMProviderModelListKey],
-      // },
       showChecker
         ? (checkerItem ?? {
-            children: <Checker model={checkModel!} provider={id} />,
+            children: isLoading ? (
+              <Skeleton.Button active />
+            ) : (
+              <Checker model={checkModel!} provider={id} />
+            ),
             desc: t('llm.checker.desc'),
             label: t('llm.checker.title'),
             minWidth: undefined,
@@ -247,12 +258,16 @@ const ProviderConfig = memo<ProviderConfigProps>(
             </Link>
           </Tooltip>
           {canDeactivate ? (
-            <Switch
-              onChange={(enabled) => {
-                toggleProviderEnabled(id as any, enabled);
-              }}
-              value={enabled}
-            />
+            isLoading ? (
+              <Skeleton.Button active className={styles.switchLoading} />
+            ) : (
+              <Switch
+                onChange={(enabled) => {
+                  toggleProviderEnabled(id as any, enabled);
+                }}
+                value={enabled}
+              />
+            )
           ) : undefined}
         </Flexbox>
       ),
@@ -276,7 +291,9 @@ const ProviderConfig = memo<ProviderConfigProps>(
         className={cx(styles.form, className)}
         form={form}
         items={[model]}
-        onValuesChange={debounce(setSettings, 100)}
+        onValuesChange={(changedValues) => {
+          debouncedUpdate(id, changedValues);
+        }}
         variant={'pure'}
         {...FORM_STYLE}
       />
@@ -285,3 +302,5 @@ const ProviderConfig = memo<ProviderConfigProps>(
 );
 
 export default ProviderConfig;
+
+export { SkeletonInput } from './SkeletonInput';

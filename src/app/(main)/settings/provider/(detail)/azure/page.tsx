@@ -5,14 +5,16 @@ import { AutoComplete, Input } from 'antd';
 import { createStyles } from 'antd-style';
 import { useTranslation } from 'react-i18next';
 
-import ProviderDetail from '../[id]';
 import { AzureProviderCard } from '@/config/modelProviders';
 import { ModelProvider } from '@/libs/agent-runtime';
+import { aiProviderSelectors, useAiInfraStore } from '@/store/aiInfra';
 import { useUserStore } from '@/store/user';
 import { modelProviderSelectors } from '@/store/user/selectors';
 
-import { KeyVaultsConfigKey, LLMProviderApiTokenKey } from '../../const';
+import { KeyVaultsConfigKey, LLMProviderApiTokenKey, LLMProviderBaseUrlKey } from '../../const';
+import { SkeletonInput } from '../../features/ProviderConfig';
 import { ProviderItem } from '../../type';
+import ProviderDetail from '../[id]';
 
 const useStyles = createStyles(({ css, token }) => ({
   markdown: css`
@@ -42,11 +44,16 @@ const useProviderCard = (): ProviderItem => {
 
     return 'gpt-35-turbo';
   });
+
+  const isLoading = useAiInfraStore(aiProviderSelectors.isAiProviderConfigLoading(providerKey));
+
   return {
     ...AzureProviderCard,
     apiKeyItems: [
       {
-        children: (
+        children: isLoading ? (
+          <SkeletonInput />
+        ) : (
           <Input.Password
             autoComplete={'new-password'}
             placeholder={t('azure.token.placeholder')}
@@ -54,16 +61,22 @@ const useProviderCard = (): ProviderItem => {
         ),
         desc: t('azure.token.desc'),
         label: t('azure.token.title'),
-        name: [KeyVaultsConfigKey, providerKey, LLMProviderApiTokenKey],
+        name: [KeyVaultsConfigKey, LLMProviderApiTokenKey],
       },
       {
-        children: <Input allowClear placeholder={t('azure.endpoint.placeholder')} />,
+        children: isLoading ? (
+          <SkeletonInput />
+        ) : (
+          <Input allowClear placeholder={t('azure.endpoint.placeholder')} />
+        ),
         desc: t('azure.endpoint.desc'),
         label: t('azure.endpoint.title'),
-        name: [KeyVaultsConfigKey, providerKey, 'endpoint'],
+        name: [KeyVaultsConfigKey, LLMProviderBaseUrlKey],
       },
       {
-        children: (
+        children: isLoading ? (
+          <SkeletonInput />
+        ) : (
           <AutoComplete
             options={[
               '2024-06-01',
@@ -85,7 +98,7 @@ const useProviderCard = (): ProviderItem => {
           </Markdown>
         ),
         label: t('azure.azureApiVersion.title'),
-        name: [KeyVaultsConfigKey, providerKey, 'apiVersion'],
+        name: [KeyVaultsConfigKey, 'apiVersion'],
       },
     ],
     checkModel,
