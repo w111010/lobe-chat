@@ -1,7 +1,8 @@
 import { AudioPlayer } from '@lobehub/tts/react';
 import { Alert, Highlighter } from '@lobehub/ui';
-import { Button, RefSelectProps, Select, SelectProps } from 'antd';
+import { Button, Select, SelectProps } from 'antd';
 import { useTheme } from 'antd-style';
+import type { RefSelectProps } from 'antd/es/select';
 import { forwardRef, useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
@@ -9,7 +10,10 @@ import { Flexbox } from 'react-layout-kit';
 import { useTTS } from '@/hooks/useTTS';
 import { TTSServer } from '@/types/agent';
 import { ChatMessageError } from '@/types/message';
+import type { TTSHookResult } from '@/types/tts';
 import { getMessageError } from '@/utils/fetch';
+
+import { getVoiceOptions } from './VoiceOptions';
 
 interface SelectWithTTSPreviewProps extends SelectProps {
   server: TTSServer;
@@ -21,7 +25,7 @@ const SelectWithTTSPreview = forwardRef<RefSelectProps, SelectWithTTSPreviewProp
     const [voice, setVoice] = useState<string>(value);
     const { t } = useTranslation('welcome');
     const theme = useTheme();
-    const PREVIEW_TEXT = ['Lobe Chat', t('slogan.title'), t('slogan.desc1')].join('. ');
+    const previewText = ['Lobe Chat', t('slogan.title'), t('slogan.desc1')].join('. ');
 
     const setDefaultError = useCallback(
       (err?: any) => {
@@ -30,7 +34,7 @@ const SelectWithTTSPreview = forwardRef<RefSelectProps, SelectWithTTSPreviewProp
       [t],
     );
 
-    const { isGlobalLoading, audio, stop, start, response, setText } = useTTS(PREVIEW_TEXT, {
+    const { isGlobalLoading, audio, stop, start, response, setText } = useTTS(previewText, {
       onError: (err) => {
         stop();
         setDefaultError(err);
@@ -52,7 +56,7 @@ const SelectWithTTSPreview = forwardRef<RefSelectProps, SelectWithTTSPreviewProp
       },
       server,
       voice,
-    });
+    }) as TTSHookResult;
 
     const handleCloseError = useCallback(() => {
       setError(undefined);
@@ -68,13 +72,19 @@ const SelectWithTTSPreview = forwardRef<RefSelectProps, SelectWithTTSPreviewProp
     const handleSelect: SelectProps['onSelect'] = (value, option) => {
       stop();
       setVoice(value as string);
-      setText([PREVIEW_TEXT, option?.label].join(' - '));
+      setText([previewText, option?.label].join(' - '));
       onSelect?.(value, option);
     };
     return (
       <Flexbox gap={8}>
         <Flexbox align={'center'} gap={8} horizontal style={{ width: '100%' }}>
-          <Select onSelect={handleSelect} options={options} ref={ref} value={value} {...rest} />
+          <Select
+            onSelect={handleSelect}
+            options={options || getVoiceOptions(server)}
+            ref={ref}
+            value={value}
+            {...rest}
+          />
           <AudioPlayer
             allowPause={false}
             audio={audio}

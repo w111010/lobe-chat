@@ -4,6 +4,7 @@ import { ProviderCombine } from '@lobehub/icons';
 import { Form, type FormItemProps, Icon, type ItemGroup, Tooltip } from '@lobehub/ui';
 import { Input, Switch } from 'antd';
 import { createStyles } from 'antd-style';
+import { TFunction } from 'i18next';
 import { debounce } from 'lodash-es';
 import { LockIcon } from 'lucide-react';
 import Link from 'next/link';
@@ -83,7 +84,9 @@ const useStyles = createStyles(({ css, prefixCls, responsive, token }) => ({
 }));
 
 export interface ProviderConfigProps extends Omit<ModelProviderCard, 'id' | 'chatModels'> {
-  apiKeyItems?: FormItemProps[];
+  apiKeyItems?:
+    | FormItemProps[]
+    | ((props: { t: TFunction<'setting', undefined> }) => FormItemProps[]);
   canDeactivate?: boolean;
   checkerItem?: FormItemProps;
   className?: string;
@@ -142,19 +145,21 @@ const ProviderConfig = memo<ProviderConfigProps>(
 
     const apiKeyItem: FormItemProps[] = !showApiKey
       ? []
-      : (apiKeyItems ?? [
-          {
-            children: (
-              <Input.Password
-                autoComplete={'new-password'}
-                placeholder={t(`llm.apiKey.placeholder`, { name })}
-              />
-            ),
-            desc: t(`llm.apiKey.desc`, { name }),
-            label: t(`llm.apiKey.title`),
-            name: [KeyVaultsConfigKey, id, LLMProviderApiTokenKey],
-          },
-        ]);
+      : typeof apiKeyItems === 'function'
+        ? apiKeyItems({ t })
+        : (apiKeyItems ?? [
+            {
+              children: (
+                <Input.Password
+                  autoComplete={'new-password'}
+                  placeholder={t(`llm.apiKey.placeholder`, { name })}
+                />
+              ),
+              desc: t(`llm.apiKey.desc`, { name }),
+              label: t(`llm.apiKey.title`),
+              name: [KeyVaultsConfigKey, id, LLMProviderApiTokenKey],
+            },
+          ]);
 
     const aceGcmItem: FormItemProps = {
       children: (

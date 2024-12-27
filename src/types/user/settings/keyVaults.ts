@@ -26,6 +26,11 @@ export interface WenxinKeyVault {
   secretKey?: string;
 }
 
+export interface MinimaxiKeyVault {
+  apiKey?: string;
+  groupId?: string;
+}
+
 export interface UserKeyVaults {
   ai21?: OpenAICompatibleKeyVault;
   ai360?: OpenAICompatibleKeyVault;
@@ -46,6 +51,7 @@ export interface UserKeyVaults {
   internlm?: OpenAICompatibleKeyVault;
   lobehub?: any;
   minimax?: OpenAICompatibleKeyVault;
+  minimaxi?: MinimaxiKeyVault;
   mistral?: OpenAICompatibleKeyVault;
   moonshot?: OpenAICompatibleKeyVault;
   novita?: OpenAICompatibleKeyVault;

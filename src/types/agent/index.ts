@@ -4,7 +4,7 @@ import { FileItem } from '@/types/files';
 import { KnowledgeBaseItem } from '@/types/knowledgeBase';
 import { FewShots, LLMParams } from '@/types/llm';
 
-export type TTSServer = 'openai' | 'edge' | 'microsoft';
+export type TTSServer = 'openai' | 'edge' | 'microsoft' | 'minimaxi';
 
 export interface LobeAgentTTSConfig {
   showAllLocaleVoice?: boolean;
@@ -13,6 +13,7 @@ export interface LobeAgentTTSConfig {
   voice: {
     edge?: string;
     microsoft?: string;
+    minimaxi?: string;
     openai: string;
   };
 }

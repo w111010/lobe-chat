@@ -106,6 +106,11 @@ export default {
       latestTime: '上次更新时间：{{time}}',
       noLatestTime: '暂未获取列表',
     },
+    groupId: {
+      desc: '用于 {{name}} TTS 的 Group ID',
+      placeholder: '输入您的 {{name}} Group ID',
+      title: 'Group ID',
+    },
     helpDoc: '配置教程',
     modelList: {
       desc: '选择在会话中展示的模型，选择的模型会在模型列表中展示',
