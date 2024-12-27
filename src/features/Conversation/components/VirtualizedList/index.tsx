@@ -27,7 +27,7 @@ const EmptyState = () => (
 );
 
 const VirtualizedList = memo<VirtualizedListProps>(({ mobile, dataSource, itemContent }) => {
-  // Move all hooks to the top of the component
+  // All hooks must be called before any conditional returns
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const [atBottom, setAtBottom] = useState(true);
   const [isScrolling, setIsScrolling] = useState(false);
@@ -36,14 +36,15 @@ const VirtualizedList = memo<VirtualizedListProps>(({ mobile, dataSource, itemCo
     chatSelectors.currentChatLoadingState(s),
     chatSelectors.isCurrentChatLoaded(s),
   ]);
-  const prevDataLengthRef = useRef(dataSource.length);
+  const prevDataLengthRef = useRef(dataSource?.length ?? 0);
   const theme = useTheme();
 
   const getFollowOutput = useCallback(() => {
+    if (!dataSource) return false;
     const newFollowOutput = dataSource.length > prevDataLengthRef.current ? 'auto' : false;
     prevDataLengthRef.current = dataSource.length;
     return newFollowOutput;
-  }, [dataSource.length]);
+  }, [dataSource]);
 
   useEffect(() => {
     if (virtuosoRef.current) {
@@ -51,12 +52,13 @@ const VirtualizedList = memo<VirtualizedListProps>(({ mobile, dataSource, itemCo
     }
   }, [id]);
 
+  // overscan should be 3 times the height of the window
+  const overscan = typeof window !== 'undefined' ? window.innerHeight * 3 : 0;
+
   if (!dataSource || dataSource.length === 0) {
     console.debug('[VirtualizedList] No items to render');
     return <EmptyState />;
   }
-  // overscan should be 3 times the height of the window
-  const overscan = typeof window !== 'undefined' ? window.innerHeight * 3 : 0;
 
   // first time loading or not loaded
   if (isFirstLoading) return <SkeletonList mobile={mobile} />;
