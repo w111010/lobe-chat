@@ -1,9 +1,12 @@
-import { ModelProviderCard } from '@/types/llm';
+import { FormItemProps } from '@lobehub/ui';
 import { Input } from 'antd';
+import { TFunction } from 'i18next';
 import React from 'react';
 
-const Minimax: ModelProviderCard = {
-  apiKeyItems: ({ t }) => [
+import { ModelProviderCard } from '@/types/llm';
+
+export const Minimax: ModelProviderCard = {
+  apiKeyItems: ({ t }: { t: TFunction<'setting', undefined> }): FormItemProps[] => [
     {
       children: React.createElement(Input.Password, {
         placeholder: t('llm.apiKey.placeholder', { name: 'Minimax' }),

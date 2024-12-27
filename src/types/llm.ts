@@ -1,4 +1,5 @@
 import { FormItemProps } from '@lobehub/ui';
+import { TFunction } from 'i18next';
 import { ReactNode } from 'react';
 
 export type ModelPriceCurrency = 'CNY' | 'USD';
@@ -74,7 +75,9 @@ export interface ModelProviderCard {
   /**
    * Custom form items for API key configuration
    */
-  apiKeyItems?: (props: { t: (key: string, options?: any) => string }) => FormItemProps[];
+  apiKeyItems?:
+    | FormItemProps[]
+    | ((props: { t: TFunction<'setting', undefined> }) => FormItemProps[]);
   chatModels: ChatModelCard[];
   /**
    * the default model that used for connection check

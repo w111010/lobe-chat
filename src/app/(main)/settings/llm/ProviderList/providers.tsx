@@ -52,7 +52,7 @@ export const useProviderList = (): ProviderItem[] => {
   const HuggingFaceProvider = useHuggingFaceProvider();
   const WenxinProvider = useWenxinProvider();
 
-  return useMemo(
+  return useMemo<ProviderItem[]>(
     () => [
       OpenAIProvider,
       AzureProvider,
