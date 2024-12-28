@@ -24,7 +24,8 @@ export const preferredRegion = [
   'syd1',
 ];
 
-const handler: RequestHandler = async (req, { jwtPayload }) => {
+const handler: RequestHandler = async (req, options) => {
+  const { jwtPayload } = options;
   const payload = (await req.json()) as MinimaxTTSPayload;
   const { minimax } = jwtPayload;
 
