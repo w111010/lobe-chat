@@ -42,6 +42,12 @@ export interface JWTPayload {
   wenxinAccessKey?: string;
   wenxinSecretKey?: string;
 
+  minimax?: {
+    apiKey: string;
+    groupId: string;
+    baseURL?: string;
+  };
+
   /**
    * user id
    * in client db mode it's a uuid

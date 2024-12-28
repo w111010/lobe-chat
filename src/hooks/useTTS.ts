@@ -16,6 +16,7 @@ import { agentSelectors } from '@/store/agent/slices/chat';
 import { useUserStore } from '@/store/user';
 import { settingsSelectors, userGeneralSettingsSelectors } from '@/store/user/selectors';
 import { TTSServer } from '@/types/agent';
+import { MinimaxTTSOptions, useMinimaxTTS } from '@/types/tts';
 
 interface TTSConfig extends TTSOptions {
   onUpload?: (currentVoice: string, arraybuffers: ArrayBuffer[]) => void;
@@ -72,12 +73,25 @@ export const useTTS = (content: string, config?: TTSConfig) => {
       } as MicrosoftSpeechOptions;
       break;
     }
+    case 'minimax': {
+      useSelectedTTS = useMinimaxTTS;
+      options = {
+        api: {
+          serviceUrl: API_ENDPOINTS.minimax,
+        },
+        options: {
+          model: ttsSettings.minimax?.model || 'speech-01-turbo',
+          voice: config?.voice || voice,
+        },
+      } as MinimaxTTSOptions;
+      break;
+    }
   }
 
   return useSelectedTTS(content, {
     ...config,
     ...options,
-    onFinish: (arraybuffers) => {
+    onFinish: (arraybuffers: ArrayBuffer[]) => {
       config?.onUpload?.(options.voice || 'alloy', arraybuffers);
     },
   });

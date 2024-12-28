@@ -50,8 +50,8 @@ export interface UserKeyVaults {
    */
   minimax?: {
     apiKey?: string;
-    groupId?: string;
     baseURL?: string;
+    groupId?: string;
   };
   mistral?: OpenAICompatibleKeyVault;
   moonshot?: OpenAICompatibleKeyVault;
