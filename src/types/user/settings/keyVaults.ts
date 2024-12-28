@@ -45,7 +45,14 @@ export interface UserKeyVaults {
   hunyuan?: OpenAICompatibleKeyVault;
   internlm?: OpenAICompatibleKeyVault;
   lobehub?: any;
-  minimax?: OpenAICompatibleKeyVault;
+  /**
+   * Minimaxi TTS API configuration
+   */
+  minimax?: {
+    apiKey?: string;
+    groupId?: string;
+    baseURL?: string;
+  };
   mistral?: OpenAICompatibleKeyVault;
   moonshot?: OpenAICompatibleKeyVault;
   novita?: OpenAICompatibleKeyVault;
